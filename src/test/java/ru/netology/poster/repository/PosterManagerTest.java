@@ -1,122 +1,33 @@
 package ru.netology.poster.repository;
 
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
+import org.mockito.Mockito;
+
+import static org.mockito.Mockito.*;
+
 import ru.netology.poster.domain.MovieData;
 
 public class PosterManagerTest {
+    PosterRepository repo = Mockito.mock(PosterRepository.class);
+    PosterManager manager = new PosterManager(repo, 4);
+
+    MovieData movie1 = new MovieData(1, "Форсаж 1", "криминал");
+    MovieData movie2 = new MovieData(2, "Форсаж 2", "криминал");
+    MovieData movie3 = new MovieData(3, "Форсаж 3", "криминал");
+    MovieData movie4 = new MovieData(4, "Форсаж 4", "криминал");
+    MovieData movie5 = new MovieData(5, "Форсаж 5", "криминал");
+
     @Test
-    public void noArgsConstructorTest() {
-        PosterManager manager = new PosterManager();
+    public void shouldFindLastWhenLimitLessThanLength() {
+        MovieData[] movies = {movie1, movie2, movie3, movie4, movie5};
+        doReturn(movies).when(repo).findAll();
 
-        Assertions.assertEquals(10, manager.getLimit());
-    }
+        MovieData[] expected = {movie5, movie4, movie3, movie2};
 
-    @ParameterizedTest
-    @CsvSource({
-            "-42, 10",
-            "-1, 10",
-            "0, 0",
-            "1, 1",
-            "10, 10",
-            "1337, 1337"
-    })
-    public void parameterizedConstructorTest(int limit, int expected) {
-        PosterManager manager = new PosterManager(limit);
-
-        Assertions.assertEquals(expected, manager.getLimit());
-    }
-
-    @ParameterizedTest
-    @CsvSource({
-            "0",
-            "1",
-            "9"
-    })
-    public void addMovieAndFindAllTest(int startingLength) {
-        PosterManager manager = new PosterManager();
-        MovieData[] expected = new MovieData[startingLength + 1];
-
-        for (int i = 0; i <= startingLength; i++) {
-            MovieData movie = new MovieData(i, "Форсаж " + (i + 1), "криминал");
-            manager.addMovie(movie);
-            expected[i] = movie;
-        }
-
-        Assertions.assertArrayEquals(expected, manager.findAll());
-    }
-
-    @ParameterizedTest
-    @CsvSource({
-            "0, 0",
-            "500, 0",
-            "-3, 1",
-            "-34, 1",
-            "-3, 2",
-            "-2, 2",
-            "42, 2",
-            "-3, 10",
-            "-2, 10",
-            "0, 10",
-            "5, 10",
-            "6, 10",
-            "28, 10"
-    })
-    public void findByIdTest(int id, int moviesLength) {
-        PosterManager manager = new PosterManager();
-        MovieData[] repeaterArray = new MovieData[moviesLength];
-
-        for (int i = 0; i < moviesLength; i++) {
-            MovieData movie = new MovieData(i - 3, "Форсаж " + (i + 1), "криминал");
-            manager.addMovie(movie);
-            repeaterArray[i] = movie;
-        }
-
-        MovieData expected;
-        if (id + 3 < moviesLength & id + 3 >= 0) {
-            expected = repeaterArray[id + 3];
-        } else {
-            expected = null;
-        }
-
-        Assertions.assertEquals(expected, manager.findById(id));
-    }
-
-    @ParameterizedTest
-    @CsvSource({
-            "0, 0",
-            "0, 1",
-            "0, 10",
-            "1, 0",
-            "1, 1",
-            "1, 10",
-            "10, 0",
-            "10, 1",
-            "10, 5",
-            "10, 9",
-            "10, 10",
-            "10, 11",
-            "10, 13"
-    })
-    public void findLastTest(int limit, int moviesLength) {
-        int expectedLength = limit;
-        if (expectedLength > moviesLength) {
-            expectedLength = moviesLength;
-        }
-
-        PosterManager manager = new PosterManager(limit);
-        MovieData[] expected = new MovieData[expectedLength];
-
-        for (int i = 0; i < moviesLength; i++) {
-            MovieData movie = new MovieData(i, "Форсаж " + (i + 1), "криминал");
-            manager.addMovie(movie);
-        }
-
-        for (int i = 0; i < expectedLength; i++) {
-            expected[i] = manager.findById(moviesLength - 1 - i);
-        }
         Assertions.assertArrayEquals(expected, manager.findLast());
     }
 }

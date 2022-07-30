@@ -3,13 +3,15 @@ package ru.netology.poster.repository;
 import ru.netology.poster.domain.MovieData;
 
 public class PosterManager {
-    private MovieData[] movies = new MovieData[0];
     private int limit = 10;
+    private PosterRepository repo;
 
-    public PosterManager() {
+    public PosterManager(PosterRepository repo) {
+        this.repo = repo;
     }
 
-    public PosterManager(int limit) {
+    public PosterManager(PosterRepository repo, int limit) {
+        this.repo = repo;
         if (limit > -1) {
             this.limit = limit;
         }
@@ -19,34 +21,24 @@ public class PosterManager {
         return limit;
     }
 
-    public MovieData findById(int id) {
-        for (MovieData movie : movies) {
-            if (movie.getId() == id) {
-                return movie;
-            }
-        }
-        return null;
-    }
-
     public void addMovie(MovieData movie) {
-        MovieData[] tmp = new MovieData[movies.length + 1];
-        for (int i = 0; i < movies.length; i++) {
-            tmp[i] = movies[i];
-        }
-        tmp[tmp.length - 1] = movie;
-        movies = tmp;
+        repo.save(movie);
     }
 
     public MovieData[] findAll() {
-        return movies;
+        return repo.findAll();
     }
 
     public MovieData[] findLast() {
+        MovieData[] movies = repo.findAll();
         int resultLength = limit;
+
         if (resultLength > movies.length) {
             resultLength = movies.length;
         }
+
         MovieData[] result = new MovieData[resultLength];
+
         for (int i = 0; i < resultLength; i++) {
             result[i] = movies[movies.length - 1 - i];
         }
